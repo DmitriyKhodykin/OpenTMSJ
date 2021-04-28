@@ -4,25 +4,32 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
+import java.util.Scanner;
 
 /**
  * Author: @Dmitriy_Khodykin
  * Licence: GPLv3
  *
  * Module is using geocoding service Mapbox
+ * DaData https://dadata.ru/api/geocode/
  * Documentation: https://docs.mapbox.com/api/overview/
  */
 
 public class Geocoding {
 
     public static void main(String[] args) {
+
+        Scanner console = new Scanner(System.in, "UTF-8");
+        String address = console.nextLine();
+        System.out.println(address);
+
         Geocoding gc = new Geocoding();
-        String result = gc.getResponse("Russia, Voronezhskaya, Voronezh, Patriotov, 35");
+        String result = gc.getResponse(address);
         System.out.println(result);
     }
 
     private static String getToken() {
-
+        // Read authorisation data from file
         FileInputStream fis;
         Properties property = new Properties();
 
