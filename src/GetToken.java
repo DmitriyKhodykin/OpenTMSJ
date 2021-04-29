@@ -3,10 +3,6 @@ import java.util.Properties;
 
 public class GetToken {
 
-    public static void main(String tokenName) {
-        GetToken.getToken(tokenName);
-    }
-
     public static String getToken(String tokenName) {
         // Read authorisation data from file
         FileInputStream fis;
