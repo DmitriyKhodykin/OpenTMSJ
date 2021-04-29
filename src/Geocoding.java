@@ -16,10 +16,9 @@ import java.util.Scanner;
 public class Geocoding {
 
     public static void main(String[] args) {
-
+        // Address input throw terminal
         Scanner console = new Scanner(System.in, "UTF-8");
         String address = console.nextLine();
-        System.out.println(address);
 
         Geocoding gc = new Geocoding();
         String result = gc.getResponse(address);
@@ -27,6 +26,8 @@ public class Geocoding {
     }
 
     private String getResponse(String address) {
+
+        address = "[ \"" + address + "\" ]"; // Format DaData service: [ "address" ]
         String urlAddress = "https://cleaner.dadata.ru/api/v1/clean/address";
         URL url;
         HttpURLConnection httpURLConnection;
@@ -34,9 +35,9 @@ public class Geocoding {
         InputStreamReader isr = null;
         BufferedReader bfr = null;
         StringBuilder stringBuilder = new StringBuilder();
-        GetToken.getToken("daSecret");
 
         try {
+            // Create byte-object for output stream
             byte[] message = address.getBytes(StandardCharsets.UTF_8);
 
             // Create connection object
@@ -50,7 +51,7 @@ public class Geocoding {
             httpURLConnection.setConnectTimeout(500);
             httpURLConnection.setReadTimeout(500);
 
-            // Request properties
+            // Request properties = Headers
             httpURLConnection.addRequestProperty("authorization", GetToken.getToken("daToken"));
             httpURLConnection.addRequestProperty("x-secret", GetToken.getToken("daSecret"));
             httpURLConnection.addRequestProperty("content-type", "application/json");
@@ -60,7 +61,7 @@ public class Geocoding {
 
             try {
                 os = httpURLConnection.getOutputStream();
-                os.write(message);
+                os.write(message); // byte-object
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
