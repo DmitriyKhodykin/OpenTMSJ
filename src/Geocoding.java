@@ -17,7 +17,7 @@ public class Geocoding {
 
     public static void main(String[] args) {
         // Address input from terminal
-        Scanner console = new Scanner(System.in, "UTF-8");
+        Scanner console = new Scanner(System.in);
         String address = console.nextLine();
 
         Geocoding gc = new Geocoding();
@@ -81,16 +81,19 @@ public class Geocoding {
             System.err.println(e.getMessage());
         } finally {
             try {
+                assert isr != null;
                 isr.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
+                assert bfr != null;
                 bfr.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
+                assert os != null;
                 os.close();
             } catch (IOException e) {
                 e.printStackTrace();
