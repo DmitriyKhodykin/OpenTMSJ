@@ -1,3 +1,4 @@
 src/auth.properties
+src/Test.java
 # Project exclude paths
 /out/

@@ -1,18 +1,16 @@
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
  * Author: @Dmitriy_Khodykin
  * Licence: GPLv3
  *
- * Module is using geocoding service Mapbox
- * DaData https://dadata.ru/api/geocode/
- * Documentation: https://docs.mapbox.com/api/overview/
+ * Module is using geocoding service DaData
+ * Documentation: https://dadata.ru/api/geocode/
  */
 
 public class Geocoding {
@@ -28,66 +26,75 @@ public class Geocoding {
         System.out.println(result);
     }
 
-    private static String getToken() {
-        // Read authorisation data from file
-        FileInputStream fis;
-        Properties property = new Properties();
+    private String getResponse(String address) {
+        String urlAddress = "https://cleaner.dadata.ru/api/v1/clean/address";
+        URL url;
+        HttpURLConnection httpURLConnection;
+        OutputStream os = null;
+        InputStreamReader isr = null;
+        BufferedReader bfr = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        GetToken.getToken("daSecret");
 
         try {
-            fis = new FileInputStream("src\\auth.properties");
-            property.load(fis);
-            return property.getProperty("mapboxToken");
-        } catch (java.io.IOException e) {
-            System.err.println("error: Property not found");
-        }
-        return null;
-    }
+            byte[] message = address.getBytes(StandardCharsets.UTF_8);
 
-    private String getResponse(String adress) {
-
-        String mapboxGeocodingUrl = "https://api.mapbox.com/geocoding/v5/mapbox.places/";
-        String mapboxGeoPoint = adress;
-        String mapboxAccessParam = ".json?limit=2&access_token=";
-        String mapboxToken = getToken();
-
-        String query = mapboxGeocodingUrl + mapboxGeoPoint + mapboxAccessParam + mapboxToken;
-
-        HttpURLConnection connection = null;
-
-        try {
             // Create connection object
-            connection = (HttpURLConnection) new URL(query).openConnection();
+            url = new URL(urlAddress);
+            httpURLConnection = (HttpURLConnection)url.openConnection();
 
             // Connection properties
-            connection.setRequestMethod("GET");
-            connection.setUseCaches(false);
-            connection.setConnectTimeout(500);
-            connection.setReadTimeout(500);
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setDoInput(true);
+            httpURLConnection.setConnectTimeout(500);
+            httpURLConnection.setReadTimeout(500);
 
-            connection.connect();
+            // Request properties
+            httpURLConnection.addRequestProperty("authorization", GetToken.getToken("daToken"));
+            httpURLConnection.addRequestProperty("x-secret", GetToken.getToken("daSecret"));
+            httpURLConnection.addRequestProperty("content-type", "application/json");
+            httpURLConnection.addRequestProperty("cache-control", "no-cache");
 
-            StringBuilder sb = new StringBuilder();
+            httpURLConnection.connect();
 
-            if (HttpURLConnection.HTTP_OK == connection.getResponseCode()) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-                String line;
-                while ((line = in.readLine()) != null) {
-                    sb.append(line);
-                }
-
-                return sb.toString();
-            } else {
-                System.out.println("fail: " + connection.getResponseCode() + ", " + connection.getResponseMessage());
+            try {
+                os = httpURLConnection.getOutputStream();
+                os.write(message);
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
             }
 
-        } catch (Throwable cause) {
-            cause.printStackTrace();
+            if (HttpURLConnection.HTTP_OK == httpURLConnection.getResponseCode()) {
+                isr = new InputStreamReader(httpURLConnection.getInputStream());
+                bfr = new BufferedReader(isr);
+                String response;
+                while ((response=bfr.readLine()) != null) {
+                    stringBuilder.append(response);
+                }
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
         } finally {
-            if (connection != null) {
-                connection.disconnect();
+            try {
+                isr.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bfr.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                os.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-        return null;
+        return stringBuilder.toString();
     }
 }
