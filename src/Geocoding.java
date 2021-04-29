@@ -25,7 +25,7 @@ public class Geocoding {
         System.out.println(result);
     }
 
-    private String getResponse(String address) {
+    public String getResponse(String address) {
 
         address = "[ \"" + address + "\" ]"; // Format DaData service: [ "address" ]
         String urlAddress = "https://cleaner.dadata.ru/api/v1/clean/address";
