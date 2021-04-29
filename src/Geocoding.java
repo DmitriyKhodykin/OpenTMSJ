@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class Geocoding {
 
     public static void main(String[] args) {
-        // Address input throw terminal
+        // Address input from terminal
         Scanner console = new Scanner(System.in, "UTF-8");
         String address = console.nextLine();
 
